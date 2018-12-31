@@ -1,28 +1,38 @@
-{-# LANGUAGE DeriveDataTypeable #-} 
+{-# LANGUAGE DeriveDataTypeable #-}
 
-import Control.Monad ( when )
-import Data.List ( sort ) 
-import Data.Time ( getZonedTime, formatTime, defaultTimeLocale )
-import System.Console.CmdArgs.Implicit ( (&=), cmdArgs, Data, def, help, opt, program, summary, typ, typDir, Typeable )
-import System.Directory ( createDirectoryIfMissing, doesDirectoryExist, doesFileExist, getDirectoryContents, getHomeDirectory )
-import System.FilePath ( combine, splitFileName )
-import System.Process ( runCommand, waitForProcess )
+import           Control.Monad                   (when)
+import           Data.List                       (sort)
+import           Data.Time
+    (defaultTimeLocale, formatTime, getZonedTime)
+import           Data.Version                    (showVersion)
+import           Paths_jot                       (version)
+import           System.Console.CmdArgs.Implicit
+    (Data, Typeable, cmdArgs, def, help, opt, program, summary, typ, typDir,
+    (&=))
+import           System.Directory
+    (createDirectoryIfMissing, doesDirectoryExist, doesFileExist,
+    getDirectoryContents, getHomeDirectory)
+import           System.FilePath                 (combine, splitFileName)
+import           System.Process                  (runCommand, waitForProcess)
 
 data Command = Command {dir :: FilePath, print_ :: Bool, text :: String}
               deriving (Show, Data, Typeable)
+
+programVersion :: String
+programVersion = "jot-" ++ showVersion version
 
 command :: Command
 command = Command
   { dir = def &= help "Directory for jotted notes (default: ~/.jot)" &= typDir,
     print_ = def &= help "Print contents of all notes",
     text = def &= opt "" &= help "Text to record (omit to use editor)" &= typ "STRING" }
-    &= help "Quickly record and retrieve notes" &= program "jot" &= summary "Jot v1.0"
+    &= help "Quickly record and retrieve notes" &= program "jot" &= summary programVersion
 
 jot :: Command -> IO ()
 jot (Command "" l t) = do
   home <- getHomeDirectory
   jot (Command (combine home ".jot") l t)
-jot (Command d True _) = do 
+jot (Command d True _) = do
   e <- doesDirectoryExist d
   when e $ mapM_ printNote =<< getFileList d
 jot (Command d _ t) = do

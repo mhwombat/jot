@@ -3,7 +3,7 @@
 }:
 mkDerivation {
   pname = "Jot";
-  version = "1.1";
+  version = "1.2";
   src = ./.;
   isLibrary = false;
   isExecutable = true;
