@@ -44,7 +44,7 @@ jot (Command d _ t) = do
 getFileList :: FilePath -> IO [FilePath]
 getFileList d = do
     fs <- getDirectoryContents d
-    return $ map (combine d) $ sort $ filter (`notElem` [".", ".."]) fs
+    return $ map (combine d) $ sort $ filter (\f -> (take 4 f) == "jot_") fs
 
 printNote :: FilePath -> IO ()
 printNote f = do
